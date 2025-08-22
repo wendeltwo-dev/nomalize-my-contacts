@@ -2,87 +2,134 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
-*/
+/* SaaS Contact Normalizer Design System */
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    /* Background & Surface Colors */
+    --background: 217 33% 97%;
+    --foreground: 215 25% 27%;
+    --surface: 220 14% 96%;
+    --surface-elevated: 0 0% 100%;
 
+    /* Brand Colors - Professional SaaS Blue/Green */
+    --primary: 213 94% 58%;
+    --primary-hover: 213 94% 50%;
+    --primary-foreground: 0 0% 100%;
+    
+    --secondary: 142 69% 58%;
+    --secondary-hover: 142 69% 50%;
+    --secondary-foreground: 0 0% 100%;
+
+    /* Accent Colors */
+    --accent: 213 94% 58%;
+    --accent-hover: 213 94% 50%;
+    --accent-foreground: 0 0% 100%;
+
+    /* Neutral Colors */
+    --muted: 215 16% 90%;
+    --muted-foreground: 215 13% 50%;
+    --muted-hover: 215 16% 85%;
+
+    /* Semantic Colors */
+    --success: 142 76% 36%;
+    --success-foreground: 0 0% 100%;
+    --warning: 38 92% 50%;
+    --warning-foreground: 0 0% 100%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    /* Border & Input */
+    --border: 214 32% 91%;
+    --border-hover: 213 27% 84%;
+    --input: 214 32% 91%;
+    --input-focus: 213 94% 58%;
+    --ring: 213 94% 58%;
+
+    /* Card Components */
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card-foreground: 215 25% 27%;
+    --card-border: 214 32% 91%;
 
+    /* Interactive States */
+    --hover: 213 94% 96%;
+    --active: 213 94% 92%;
+
+    /* Design System Values */
+    --radius: 0.75rem;
+    --radius-sm: 0.5rem;
+    --radius-lg: 1rem;
+
+    /* Shadows */
+    --shadow-sm: 0 1px 2px 0 hsl(215 25% 27% / 0.05);
+    --shadow: 0 1px 3px 0 hsl(215 25% 27% / 0.1), 0 1px 2px -1px hsl(215 25% 27% / 0.1);
+    --shadow-lg: 0 10px 15px -3px hsl(215 25% 27% / 0.1), 0 4px 6px -4px hsl(215 25% 27% / 0.1);
+
+    /* Transitions */
+    --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-fast: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+
+    /* Typography */
+    --font-heading: 'Inter', system-ui, sans-serif;
+    --font-body: 'Inter', system-ui, sans-serif;
+
+    /* Legacy shadcn support */
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
-
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
-
-    --radius: 0.5rem;
-
+    --popover-foreground: 215 25% 27%;
     --sidebar-background: 0 0% 98%;
-
     --sidebar-foreground: 240 5.3% 26.1%;
-
     --sidebar-primary: 240 5.9% 10%;
-
     --sidebar-primary-foreground: 0 0% 98%;
-
     --sidebar-accent: 240 4.8% 95.9%;
-
     --sidebar-accent-foreground: 240 5.9% 10%;
-
     --sidebar-border: 220 13% 91%;
-
     --sidebar-ring: 217.2 91.2% 59.8%;
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
+    --background: 215 28% 17%;
+    --foreground: 213 31% 91%;
+    --surface: 215 25% 19%;
+    --surface-elevated: 215 22% 22%;
 
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
+    --primary: 213 94% 58%;
+    --primary-hover: 213 94% 66%;
+    --primary-foreground: 0 0% 100%;
+    
+    --secondary: 142 69% 58%;
+    --secondary-hover: 142 69% 66%;
+    --secondary-foreground: 0 0% 100%;
 
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
+    --accent: 213 94% 58%;
+    --accent-hover: 213 94% 66%;
+    --accent-foreground: 0 0% 100%;
 
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
+    --muted: 215 25% 25%;
+    --muted-foreground: 215 10% 65%;
+    --muted-hover: 215 25% 30%;
 
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
+    --success: 142 76% 46%;
+    --success-foreground: 0 0% 100%;
+    --warning: 38 92% 60%;
+    --warning-foreground: 0 0% 100%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
 
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
+    --border: 215 25% 25%;
+    --border-hover: 215 25% 35%;
+    --input: 215 25% 25%;
+    --input-focus: 213 94% 58%;
+    --ring: 213 94% 58%;
 
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
+    --card: 215 22% 22%;
+    --card-foreground: 213 31% 91%;
+    --card-border: 215 25% 25%;
 
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
+    --hover: 213 94% 15%;
+    --active: 213 94% 20%;
 
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
+    --popover: 215 22% 22%;
+    --popover-foreground: 213 31% 91%;
     --sidebar-background: 240 5.9% 10%;
     --sidebar-foreground: 240 4.8% 95.9%;
     --sidebar-primary: 224.3 76.3% 48%;
@@ -100,6 +147,40 @@ All colors MUST be HSL.
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-body antialiased;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-heading;
+  }
+}
+
+@layer components {
+  .saas-card {
+    @apply bg-card border border-card-border rounded-lg shadow-sm;
+  }
+  
+  .saas-button-primary {
+    @apply bg-primary hover:bg-primary-hover text-primary-foreground font-medium rounded-lg px-4 py-2 transition-colors;
+  }
+  
+  .saas-button-secondary {
+    @apply bg-secondary hover:bg-secondary-hover text-secondary-foreground font-medium rounded-lg px-4 py-2 transition-colors;
+  }
+  
+  .saas-table {
+    @apply w-full border-collapse;
+  }
+  
+  .saas-table th {
+    @apply bg-muted text-left p-3 font-medium text-sm border-b border-border;
+  }
+  
+  .saas-table td {
+    @apply p-3 border-b border-border text-sm;
+  }
+  
+  .saas-input {
+    @apply bg-surface-elevated border border-input rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:border-input-focus transition-colors;
   }
 }
