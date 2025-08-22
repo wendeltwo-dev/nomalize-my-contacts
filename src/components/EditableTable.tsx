@@ -8,14 +8,66 @@ interface EditableTableProps {
   onContactsLoad: (contacts: Contact[]) => void;
 }
 
+// Simple contact interface for the editable table
+interface SimpleContact {
+  name: string;
+  phone: string;
+}
+
+// Create a full Contact from simple data
+const createFullContact = (simple: SimpleContact): Contact => ({
+  firstName: simple.name,
+  middleName: '',
+  lastName: '',
+  phoneticFirstName: '',
+  phoneticMiddleName: '',
+  phoneticLastName: '',
+  namePrefix: '',
+  nameSuffix: '',
+  nickname: '',
+  fileAs: '',
+  organizationName: '',
+  organizationTitle: '',
+  organizationDepartment: '',
+  birthday: '',
+  notes: '',
+  photo: '',
+  labels: '',
+  email1Label: '',
+  email1Value: '',
+  email2Label: '',
+  email2Value: '',
+  phone1Label: 'Mobile',
+  phone1Value: simple.phone,
+  phone2Label: '',
+  phone2Value: '',
+  phone3Label: '',
+  phone3Value: '',
+  phone4Label: '',
+  phone4Value: '',
+  address1Label: '',
+  address1Formatted: '',
+  address1Street: '',
+  address1City: '',
+  address1POBox: '',
+  address1Region: '',
+  address1PostalCode: '',
+  address1Country: '',
+  address1ExtendedAddress: '',
+  website1Label: '',
+  website1Value: '',
+  name: simple.name,
+  phone: simple.phone
+});
+
 export const EditableTable: React.FC<EditableTableProps> = ({ onContactsLoad }) => {
-  const [contacts, setContacts] = useState<Contact[]>([
+  const [contacts, setContacts] = useState<SimpleContact[]>([
     { name: '', phone: '' },
     { name: '', phone: '' },
     { name: '', phone: '' }
   ]);
 
-  const updateContact = useCallback((index: number, field: keyof Contact, value: string) => {
+  const updateContact = useCallback((index: number, field: keyof SimpleContact, value: string) => {
     const newContacts = [...contacts];
     newContacts[index] = { ...newContacts[index], [field]: value };
     setContacts(newContacts);
@@ -41,7 +93,9 @@ export const EditableTable: React.FC<EditableTableProps> = ({ onContactsLoad }) 
       return;
     }
 
-    onContactsLoad(validContacts);
+    // Convert simple contacts to full Contact format
+    const fullContacts = validContacts.map(createFullContact);
+    onContactsLoad(fullContacts);
   }, [contacts, onContactsLoad]);
 
   const handlePaste = useCallback((e: React.ClipboardEvent<HTMLInputElement>) => {

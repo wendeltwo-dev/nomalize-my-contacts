@@ -1,6 +1,61 @@
 export interface Contact {
-  name: string;
-  phone: string;
+  // Name fields
+  firstName: string;
+  middleName: string;
+  lastName: string;
+  phoneticFirstName: string;
+  phoneticMiddleName: string;
+  phoneticLastName: string;
+  namePrefix: string;
+  nameSuffix: string;
+  nickname: string;
+  fileAs: string;
+  
+  // Organization
+  organizationName: string;
+  organizationTitle: string;
+  organizationDepartment: string;
+  
+  // Personal info
+  birthday: string;
+  notes: string;
+  photo: string;
+  labels: string;
+  
+  // Emails
+  email1Label: string;
+  email1Value: string;
+  email2Label: string;
+  email2Value: string;
+  
+  // Phones
+  phone1Label: string;
+  phone1Value: string;
+  phone2Label: string;
+  phone2Value: string;
+  phone3Label: string;
+  phone3Value: string;
+  phone4Label: string;
+  phone4Value: string;
+  
+  // Address
+  address1Label: string;
+  address1Formatted: string;
+  address1Street: string;
+  address1City: string;
+  address1POBox: string;
+  address1Region: string;
+  address1PostalCode: string;
+  address1Country: string;
+  address1ExtendedAddress: string;
+  
+  // Website
+  website1Label: string;
+  website1Value: string;
+  
+  // Legacy fields for backward compatibility
+  name?: string;
+  phone?: string;
 }
 
 export interface NormalizationRules {
@@ -9,6 +64,14 @@ export interface NormalizationRules {
   upperCase: boolean;
   lowerCase: boolean;
   capitalize: boolean;
+  
+  // New options for handling multiple fields
+  combineNames: boolean;
+  preferPrimaryPhone: boolean;
+  includeAllPhones: boolean;
+  includeEmails: boolean;
+  includeAddress: boolean;
+  includeOrganization: boolean;
 }
 
 // Remove accents from text
@@ -73,13 +136,6 @@ const formatPhone = (phone: string, format: string): string => {
     return phone; // Return original if invalid
   }
   
-  // Pad with leading zeros if needed (for area codes)
-  if (cleanDigits.length === 10) {
-    cleanDigits = cleanDigits; // landline
-  } else if (cleanDigits.length === 11) {
-    cleanDigits = cleanDigits; // mobile
-  }
-  
   // Apply formatting based on selected pattern
   switch (format) {
     case '+55 (XX) XXXXX-XXXX':
@@ -93,6 +149,8 @@ const formatPhone = (phone: string, format: string): string => {
     case 'XXXXXXXXXX':
       return cleanDigits.length >= 10 ? cleanDigits.substring(0, 10) : cleanDigits;
       
+    case 'XXXXXXXXXXX':
+      return cleanDigits;
       
     case '+55 XX XXXXX XXXX':
       if (cleanDigits.length === 11) {
@@ -118,12 +176,6 @@ const formatPhone = (phone: string, format: string): string => {
       }
       break;
       
-    case 'XXXXXXXXXX':
-      return cleanDigits.length >= 10 ? cleanDigits.substring(0, 10) : cleanDigits;
-      
-    case 'XXXXXXXXXXX':
-      return cleanDigits;
-      
     default:
       return phone;
   }
@@ -131,10 +183,75 @@ const formatPhone = (phone: string, format: string): string => {
   return phone; // fallback
 };
 
+// Combine name parts into full name
+const combineNameParts = (contact: Contact, rules: NormalizationRules): string => {
+  const parts = [
+    contact.namePrefix,
+    contact.firstName,
+    contact.middleName,
+    contact.lastName,
+    contact.nameSuffix
+  ].filter(part => part && part.trim());
+  
+  return formatName(parts.join(' '), rules);
+};
+
+// Get primary phone number
+const getPrimaryPhone = (contact: Contact, rules: NormalizationRules): string => {
+  const phones = [
+    contact.phone1Value,
+    contact.phone2Value,
+    contact.phone3Value,
+    contact.phone4Value
+  ].filter(phone => phone && phone.trim());
+  
+  return phones.length > 0 ? formatPhone(phones[0], rules.phoneFormat) : '';
+};
+
+// Get all phone numbers formatted
+const getAllPhones = (contact: Contact, rules: NormalizationRules): string[] => {
+  const phones = [
+    contact.phone1Value,
+    contact.phone2Value,
+    contact.phone3Value,
+    contact.phone4Value
+  ].filter(phone => phone && phone.trim());
+  
+  return phones.map(phone => formatPhone(phone, rules.phoneFormat));
+};
+
 // Main normalization function
 export const normalizeContacts = (contacts: Contact[], rules: NormalizationRules): Contact[] => {
-  return contacts.map(contact => ({
-    name: formatName(contact.name, rules),
-    phone: formatPhone(contact.phone, rules.phoneFormat)
-  }));
+  return contacts.map(contact => {
+    const normalized: Contact = { ...contact };
+    
+    // Format individual name parts
+    normalized.firstName = formatName(contact.firstName, rules);
+    normalized.middleName = formatName(contact.middleName, rules);
+    normalized.lastName = formatName(contact.lastName, rules);
+    normalized.nickname = formatName(contact.nickname, rules);
+    normalized.namePrefix = formatName(contact.namePrefix, rules);
+    normalized.nameSuffix = formatName(contact.nameSuffix, rules);
+    
+    // Format organization
+    normalized.organizationName = formatName(contact.organizationName, rules);
+    normalized.organizationTitle = formatName(contact.organizationTitle, rules);
+    normalized.organizationDepartment = formatName(contact.organizationDepartment, rules);
+    
+    // Format phones
+    normalized.phone1Value = formatPhone(contact.phone1Value, rules.phoneFormat);
+    normalized.phone2Value = formatPhone(contact.phone2Value, rules.phoneFormat);
+    normalized.phone3Value = formatPhone(contact.phone3Value, rules.phoneFormat);
+    normalized.phone4Value = formatPhone(contact.phone4Value, rules.phoneFormat);
+    
+    // Legacy compatibility
+    if (rules.combineNames) {
+      normalized.name = combineNameParts(contact, rules);
+    }
+    if (rules.preferPrimaryPhone) {
+      normalized.phone = getPrimaryPhone(contact, rules);
+    }
+    
+    return normalized;
+  });
 };

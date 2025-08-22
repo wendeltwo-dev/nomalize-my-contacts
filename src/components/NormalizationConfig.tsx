@@ -117,17 +117,77 @@ export const NormalizationConfig: React.FC<NormalizationConfigProps> = ({ rules,
             </div>
           </div>
         </div>
+        
+        <div className="space-y-3">
+          <div className="flex items-center space-x-2">
+            <Checkbox
+              id="combineNames"
+              checked={rules.combineNames}
+              onCheckedChange={(checked) => updateRules('combineNames', checked)}
+            />
+            <Label htmlFor="combineNames" className="text-sm text-foreground cursor-pointer">
+              Combinar nomes em campo único
+            </Label>
+          </div>
+          
+          <div className="flex items-center space-x-2">
+            <Checkbox
+              id="includeAllPhones"
+              checked={rules.includeAllPhones}
+              onCheckedChange={(checked) => updateRules('includeAllPhones', checked)}
+            />
+            <Label htmlFor="includeAllPhones" className="text-sm text-foreground cursor-pointer">
+              Incluir todos os telefones na exportação
+            </Label>
+          </div>
+          
+          <div className="flex items-center space-x-2">
+            <Checkbox
+              id="includeEmails"
+              checked={rules.includeEmails}
+              onCheckedChange={(checked) => updateRules('includeEmails', checked)}
+            />
+            <Label htmlFor="includeEmails" className="text-sm text-foreground cursor-pointer">
+              Incluir emails na exportação
+            </Label>
+          </div>
+          
+          <div className="flex items-center space-x-2">
+            <Checkbox
+              id="includeOrganization"
+              checked={rules.includeOrganization}
+              onCheckedChange={(checked) => updateRules('includeOrganization', checked)}
+            />
+            <Label htmlFor="includeOrganization" className="text-sm text-foreground cursor-pointer">
+              Incluir dados da empresa
+            </Label>
+          </div>
+          
+          <div className="flex items-center space-x-2">
+            <Checkbox
+              id="includeAddress"
+              checked={rules.includeAddress}
+              onCheckedChange={(checked) => updateRules('includeAddress', checked)}
+            />
+            <Label htmlFor="includeAddress" className="text-sm text-foreground cursor-pointer">
+              Incluir endereços na exportação
+            </Label>
+          </div>
+        </div>
       </div>
 
       {/* Preview */}
       <div className="bg-muted/30 rounded-lg p-3 border border-border">
-        <Label className="text-xs font-medium text-muted-foreground mb-2 block">Exemplo:</Label>
+        <Label className="text-xs font-medium text-muted-foreground mb-2 block">Exemplo (Google Agenda):</Label>
         <div className="space-y-1">
           <div className="text-xs text-foreground">
-            <span className="text-muted-foreground">Nome:</span> "joão da silva" → "João Da Silva"
+            <span className="text-muted-foreground">Nome:</span> "José da Silva" → "José Da Silva"
           </div>
           <div className="text-xs text-foreground">
             <span className="text-muted-foreground">Telefone:</span> "31987654321" → "+55 (31) 98765-4321"
+          </div>
+          <div className="text-xs text-foreground">
+            <span className="text-muted-foreground">Exportação:</span> Todos os campos do Google Agenda preservados
           </div>
         </div>
       </div>

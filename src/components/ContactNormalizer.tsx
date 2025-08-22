@@ -19,7 +19,13 @@ export const ContactNormalizer = () => {
     removeAccents: false,
     upperCase: false,
     lowerCase: false,
-    capitalize: true
+    capitalize: true,
+    combineNames: true,
+    preferPrimaryPhone: true,
+    includeAllPhones: true,
+    includeEmails: true,
+    includeAddress: true,
+    includeOrganization: true
   });
   const [isProcessing, setIsProcessing] = useState(false);
   const { toast } = useToast();

@@ -2,31 +2,121 @@ import Papa from 'papaparse';
 import * as XLSX from 'xlsx';
 import { Contact } from './contactNormalizer';
 
-// Enhanced CSV parser with better field detection
+// Google Contacts CSV field mapping
+const GOOGLE_CONTACTS_FIELDS = {
+  'First Name': 'firstName',
+  'Middle Name': 'middleName',
+  'Last Name': 'lastName',
+  'Phonetic First Name': 'phoneticFirstName',
+  'Phonetic Middle Name': 'phoneticMiddleName',
+  'Phonetic Last Name': 'phoneticLastName',
+  'Name Prefix': 'namePrefix',
+  'Name Suffix': 'nameSuffix',
+  'Nickname': 'nickname',
+  'File As': 'fileAs',
+  'Organization Name': 'organizationName',
+  'Organization Title': 'organizationTitle',
+  'Organization Department': 'organizationDepartment',
+  'Birthday': 'birthday',
+  'Notes': 'notes',
+  'Photo': 'photo',
+  'Labels': 'labels',
+  'E-mail 1 - Label': 'email1Label',
+  'E-mail 1 - Value': 'email1Value',
+  'E-mail 2 - Label': 'email2Label',
+  'E-mail 2 - Value': 'email2Value',
+  'Phone 1 - Label': 'phone1Label',
+  'Phone 1 - Value': 'phone1Value',
+  'Phone 2 - Label': 'phone2Label',
+  'Phone 2 - Value': 'phone2Value',
+  'Phone 3 - Label': 'phone3Label',
+  'Phone 3 - Value': 'phone3Value',
+  'Phone 4 - Label': 'phone4Label',
+  'Phone 4 - Value': 'phone4Value',
+  'Address 1 - Label': 'address1Label',
+  'Address 1 - Formatted': 'address1Formatted',
+  'Address 1 - Street': 'address1Street',
+  'Address 1 - City': 'address1City',
+  'Address 1 - PO Box': 'address1POBox',
+  'Address 1 - Region': 'address1Region',
+  'Address 1 - Postal Code': 'address1PostalCode',
+  'Address 1 - Country': 'address1Country',
+  'Address 1 - Extended Address': 'address1ExtendedAddress',
+  'Website 1 - Label': 'website1Label',
+  'Website 1 - Value': 'website1Value'
+};
+
+// Create empty contact with all fields
+const createEmptyContact = (): Contact => ({
+  firstName: '',
+  middleName: '',
+  lastName: '',
+  phoneticFirstName: '',
+  phoneticMiddleName: '',
+  phoneticLastName: '',
+  namePrefix: '',
+  nameSuffix: '',
+  nickname: '',
+  fileAs: '',
+  organizationName: '',
+  organizationTitle: '',
+  organizationDepartment: '',
+  birthday: '',
+  notes: '',
+  photo: '',
+  labels: '',
+  email1Label: '',
+  email1Value: '',
+  email2Label: '',
+  email2Value: '',
+  phone1Label: '',
+  phone1Value: '',
+  phone2Label: '',
+  phone2Value: '',
+  phone3Label: '',
+  phone3Value: '',
+  phone4Label: '',
+  phone4Value: '',
+  address1Label: '',
+  address1Formatted: '',
+  address1Street: '',
+  address1City: '',
+  address1POBox: '',
+  address1Region: '',
+  address1PostalCode: '',
+  address1Country: '',
+  address1ExtendedAddress: '',
+  website1Label: '',
+  website1Value: ''
+});
+
+// Enhanced CSV parser with proper UTF-8 handling
 const parseCSV = (file: File): Promise<Contact[]> => {
   return new Promise((resolve, reject) => {
     Papa.parse(file, {
       header: true,
       skipEmptyLines: true,
       encoding: 'UTF-8',
-      transformHeader: (header: string) => {
-        return header.trim();
-      },
       complete: (results) => {
         try {
           console.log('CSV parsing results:', results);
           console.log('Headers found:', results.meta.fields);
+          console.log('First few rows:', results.data.slice(0, 3));
           
           const contacts: Contact[] = [];
           
           results.data.forEach((row: any, index: number) => {
-            const contact = extractContactFromRow(row);
-            if (contact.name || contact.phone) {
+            const contact = mapRowToContact(row);
+            
+            // Check if contact has any meaningful data
+            if (hasValidData(contact)) {
               contacts.push(contact);
             }
           });
 
-          console.log(`Extracted ${contacts.length} contacts from CSV`);
+          console.log(`Successfully extracted ${contacts.length} contacts from CSV`);
+          console.log('Sample contacts:', contacts.slice(0, 2));
+          
           resolve(contacts);
         } catch (error) {
           console.error('Error processing CSV data:', error);
@@ -41,124 +131,91 @@ const parseCSV = (file: File): Promise<Contact[]> => {
   });
 };
 
-// Smart contact extraction from row data
-const extractContactFromRow = (row: any): Contact => {
-  const keys = Object.keys(row);
-  let name = '';
-  let phone = '';
+// Map CSV row to Contact object
+const mapRowToContact = (row: any): Contact => {
+  const contact = createEmptyContact();
   
-  console.log('Processing row:', row);
-  
-  // Try to find name field
-  for (const key of keys) {
-    const lowerKey = key.toLowerCase().trim();
+  Object.keys(row).forEach(key => {
+    const trimmedKey = key.trim();
     const value = (row[key] || '').toString().trim();
     
-    // Name field patterns
-    if (!name && value && (
-      lowerKey.includes('name') ||
-      lowerKey.includes('nome') ||
-      lowerKey.includes('given name') ||
-      lowerKey.includes('first name') ||
-      lowerKey.includes('family name') ||
-      lowerKey.includes('last name') ||
-      lowerKey === 'name' ||
-      lowerKey === 'nome' ||
-      lowerKey === 'full name' ||
-      lowerKey === 'nome completo' ||
-      lowerKey === 'contact name' ||
-      lowerKey === 'display name'
-    )) {
-      name = value;
-      continue;
+    // Direct mapping for Google Contacts format
+    if (GOOGLE_CONTACTS_FIELDS[trimmedKey as keyof typeof GOOGLE_CONTACTS_FIELDS]) {
+      const fieldName = GOOGLE_CONTACTS_FIELDS[trimmedKey as keyof typeof GOOGLE_CONTACTS_FIELDS] as keyof Contact;
+      (contact[fieldName] as string) = value;
     }
+    // Fallback for other formats
+    else {
+      mapAlternativeFields(contact, trimmedKey, value);
+    }
+  });
+  
+  // Create legacy fields for backward compatibility
+  contact.name = [contact.namePrefix, contact.firstName, contact.middleName, contact.lastName, contact.nameSuffix]
+    .filter(part => part)
+    .join(' ')
+    .trim();
     
-    // Phone field patterns
-    if (!phone && value && (
-      lowerKey.includes('phone') ||
-      lowerKey.includes('telefone') ||
-      lowerKey.includes('fone') ||
-      lowerKey.includes('mobile') ||
-      lowerKey.includes('cel') ||
-      lowerKey.includes('celular') ||
-      lowerKey.includes('number') ||
-      lowerKey.includes('numero') ||
-      lowerKey === 'phone' ||
-      lowerKey === 'telefone' ||
-      lowerKey === 'mobile phone' ||
-      lowerKey === 'cell phone' ||
-      lowerKey === 'phone 1 - value' ||
-      lowerKey === 'phone 2 - value' ||
-      lowerKey === 'primary phone' ||
-      lowerKey === 'home phone' ||
-      lowerKey === 'work phone'
-    )) {
-      phone = value;
-      continue;
-    }
-  }
+  contact.phone = contact.phone1Value || contact.phone2Value || contact.phone3Value || contact.phone4Value || '';
   
-  // If name not found in typical fields, try to combine first and last name
-  if (!name) {
-    const firstName = findValueByPattern(row, ['given name', 'first name', 'primeiro nome', 'nome']);
-    const lastName = findValueByPattern(row, ['family name', 'last name', 'sobrenome', 'surname']);
-    const middleName = findValueByPattern(row, ['middle name', 'nome do meio']);
-    
-    if (firstName || lastName) {
-      name = [firstName, middleName, lastName].filter(Boolean).join(' ').trim();
-    }
-  }
-  
-  // If still no name, try any field that looks like a name (non-empty, non-phone-like)
-  if (!name) {
-    for (const key of keys) {
-      const value = (row[key] || '').toString().trim();
-      if (value && !isPhoneNumber(value) && !isEmail(value) && value.length > 1) {
-        name = value;
-        break;
-      }
-    }
-  }
-  
-  // If no phone found, try any field that looks like a phone number
-  if (!phone) {
-    for (const key of keys) {
-      const value = (row[key] || '').toString().trim();
-      if (value && isPhoneNumber(value)) {
-        phone = value;
-        break;
-      }
-    }
-  }
-  
-  console.log(`Extracted - Name: "${name}", Phone: "${phone}"`);
-  
-  return { name, phone };
+  return contact;
 };
 
-// Helper to find value by field patterns
-const findValueByPattern = (row: any, patterns: string[]): string => {
-  for (const key of Object.keys(row)) {
-    const lowerKey = key.toLowerCase().trim();
-    for (const pattern of patterns) {
-      if (lowerKey.includes(pattern.toLowerCase()) || lowerKey === pattern.toLowerCase()) {
-        const value = (row[key] || '').toString().trim();
-        if (value) return value;
-      }
+// Map alternative field names to contact fields
+const mapAlternativeFields = (contact: Contact, key: string, value: string) => {
+  const lowerKey = key.toLowerCase();
+  
+  // Name variations
+  if (lowerKey.includes('first') && lowerKey.includes('name') && !contact.firstName) {
+    contact.firstName = value;
+  } else if (lowerKey.includes('last') && lowerKey.includes('name') && !contact.lastName) {
+    contact.lastName = value;
+  } else if (lowerKey.includes('middle') && lowerKey.includes('name') && !contact.middleName) {
+    contact.middleName = value;
+  } else if ((lowerKey === 'name' || lowerKey === 'nome') && !contact.firstName) {
+    // If it's a simple "name" field, put it in firstName
+    contact.firstName = value;
+  }
+  
+  // Phone variations
+  else if (lowerKey.includes('phone') || lowerKey.includes('telefone') || lowerKey.includes('fone')) {
+    if (!contact.phone1Value) {
+      contact.phone1Value = value;
+      contact.phone1Label = 'Mobile';
+    } else if (!contact.phone2Value) {
+      contact.phone2Value = value;
+      contact.phone2Label = 'Other';
     }
   }
-  return '';
+  
+  // Email variations
+  else if (lowerKey.includes('email') || lowerKey.includes('e-mail')) {
+    if (!contact.email1Value) {
+      contact.email1Value = value;
+      contact.email1Label = 'Personal';
+    } else if (!contact.email2Value) {
+      contact.email2Value = value;
+      contact.email2Label = 'Work';
+    }
+  }
+  
+  // Organization variations
+  else if (lowerKey.includes('company') || lowerKey.includes('organization') || lowerKey.includes('empresa')) {
+    contact.organizationName = value;
+  }
 };
 
-// Check if a value looks like a phone number
-const isPhoneNumber = (value: string): boolean => {
-  const cleanValue = value.replace(/\D/g, '');
-  return cleanValue.length >= 8 && cleanValue.length <= 15 && /\d/.test(value);
-};
-
-// Check if a value looks like an email
-const isEmail = (value: string): boolean => {
-  return /@/.test(value) && value.includes('.');
+// Check if contact has any valid data
+const hasValidData = (contact: Contact): boolean => {
+  return !!(
+    contact.firstName ||
+    contact.lastName ||
+    contact.phone1Value ||
+    contact.phone2Value ||
+    contact.email1Value ||
+    contact.organizationName ||
+    contact.name
+  );
 };
 
 // Enhanced Excel parser
@@ -178,7 +235,7 @@ const parseExcel = (file: File): Promise<Contact[]> => {
         
         // Convert to JSON with headers
         const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
-        console.log('Excel data:', jsonData);
+        console.log('Excel data preview:', jsonData.slice(0, 3));
         
         if (jsonData.length < 1) {
           reject(new Error('Arquivo Excel vazio'));
@@ -201,13 +258,13 @@ const parseExcel = (file: File): Promise<Contact[]> => {
             }
           });
           
-          const contact = extractContactFromRow(rowObject);
-          if (contact.name || contact.phone) {
+          const contact = mapRowToContact(rowObject);
+          if (hasValidData(contact)) {
             contacts.push(contact);
           }
         }
         
-        console.log(`Extracted ${contacts.length} contacts from Excel`);
+        console.log(`Successfully extracted ${contacts.length} contacts from Excel`);
         resolve(contacts);
       } catch (error) {
         console.error('Excel parsing error:', error);
