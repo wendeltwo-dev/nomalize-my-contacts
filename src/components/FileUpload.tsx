@@ -97,6 +97,9 @@ export const FileUpload: React.FC<FileUploadProps> = ({ onContactsLoad }) => {
           <p className="text-xs text-muted-foreground">
             Suporte para .csv e .xlsx (máx. 10MB)
           </p>
+          <p className="text-xs text-muted-foreground mt-1">
+            Compatible com Google Agenda, iPhone, Outlook
+          </p>
         </div>
 
         <label htmlFor="file-upload">
@@ -121,10 +124,11 @@ export const FileUpload: React.FC<FileUploadProps> = ({ onContactsLoad }) => {
         <div className="flex items-start gap-2">
           <AlertCircle className="w-4 h-4 text-muted-foreground mt-0.5 flex-shrink-0" />
           <div className="text-xs text-muted-foreground">
-            <p className="font-medium mb-1">Formato esperado:</p>
-            <p>• Primeira linha: cabeçalhos (Nome, Telefone)</p>
-            <p>• Dados nas linhas seguintes</p>
-            <p>• Máximo de 10.000 contatos</p>
+            <p className="font-medium mb-1">Formatos aceitos:</p>
+            <p>• Google Agenda (Contatos exportados)</p>
+            <p>• iPhone/iCloud (vCard convertido para CSV)</p>
+            <p>• Outlook/Excel (qualquer formato de contato)</p>
+            <p>• Máximo de 10.000 contatos por arquivo</p>
           </div>
         </div>
       </div>

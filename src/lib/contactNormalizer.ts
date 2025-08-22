@@ -90,8 +90,9 @@ const formatPhone = (phone: string, format: string): string => {
       }
       break;
       
-    case 'XXXXXXXXXXX':
-      return cleanDigits;
+    case 'XXXXXXXXXX':
+      return cleanDigits.length >= 10 ? cleanDigits.substring(0, 10) : cleanDigits;
+      
       
     case '+55 XX XXXXX XXXX':
       if (cleanDigits.length === 11) {
@@ -116,6 +117,9 @@ const formatPhone = (phone: string, format: string): string => {
         return `${cleanDigits.substring(0, 2)} ${cleanDigits.substring(2, 6)}-${cleanDigits.substring(6)}`;
       }
       break;
+      
+    case 'XXXXXXXXXX':
+      return cleanDigits.length >= 10 ? cleanDigits.substring(0, 10) : cleanDigits;
       
     case 'XXXXXXXXXXX':
       return cleanDigits;

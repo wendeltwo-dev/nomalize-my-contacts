@@ -12,12 +12,12 @@ interface NormalizationConfigProps {
 
 export const NormalizationConfig: React.FC<NormalizationConfigProps> = ({ rules, onRulesChange }) => {
   const phoneFormats = [
-    { label: '+55 (31) 99999-9999', value: '+55 (XX) XXXXX-XXXX' },
-    { label: '031999999999', value: 'XXXXXXXXXXX' },
-    { label: '+55 31 99999 9999', value: '+55 XX XXXXX XXXX' },
-    { label: '(31) 99999-9999', value: '(XX) XXXXX-XXXX' },
-    { label: '31 99999-9999', value: 'XX XXXXX-XXXX' },
-    { label: '31999999999', value: 'XXXXXXXXXXX' }
+    { label: '+55 (31) 99999-9999', value: '+55 (XX) XXXXX-XXXX', id: 'format1' },
+    { label: '031999999999', value: 'XXXXXXXXXXX', id: 'format2' },
+    { label: '+55 31 99999 9999', value: '+55 XX XXXXX XXXX', id: 'format3' },
+    { label: '(31) 99999-9999', value: '(XX) XXXXX-XXXX', id: 'format4' },
+    { label: '31 99999-9999', value: 'XX XXXXX-XXXX', id: 'format5' },
+    { label: '31999999999', value: 'XXXXXXXXXX', id: 'format6' }
   ];
 
   const updateRules = (key: keyof NormalizationRules, value: any) => {
@@ -55,7 +55,7 @@ export const NormalizationConfig: React.FC<NormalizationConfigProps> = ({ rules,
           </SelectTrigger>
           <SelectContent className="bg-surface-elevated border border-border">
             {phoneFormats.map((format) => (
-              <SelectItem key={format.value} value={format.value} className="text-sm">
+              <SelectItem key={format.id} value={format.value} className="text-sm">
                 {format.label}
               </SelectItem>
             ))}
