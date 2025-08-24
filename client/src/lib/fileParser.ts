@@ -90,61 +90,96 @@ const createEmptyContact = (): Contact => ({
   website1Value: ''
 });
 
-// Enhanced CSV parser with proper UTF-8 handling
+// Enhanced CSV parser with automatic encoding detection
 const parseCSV = (file: File): Promise<Contact[]> => {
   return new Promise((resolve, reject) => {
-    const reader = new FileReader();
+    // Common encodings for CSV files
+    const encodings = ['UTF-8', 'windows-1252', 'ISO-8859-1', 'UTF-16'];
+    let currentEncodingIndex = 0;
     
-    reader.onload = (event) => {
-      try {
-        const csvText = event.target?.result as string;
-        
-        Papa.parse(csvText, {
-          header: true,
-          skipEmptyLines: true,
-          complete: (results) => {
-            try {
-              console.log('CSV parsing results:', results);
-              console.log('Headers found:', results.meta.fields);
-              console.log('First few rows:', results.data.slice(0, 3));
-              
-              const contacts: Contact[] = [];
-              
-              results.data.forEach((row: any, index: number) => {
-                const contact = mapRowToContact(row);
-                
-                // Check if contact has any meaningful data
-                if (hasValidData(contact)) {
-                  contacts.push(contact);
-                }
-              });
-
-              console.log(`Successfully extracted ${contacts.length} contacts from CSV`);
-              console.log('Sample contacts:', contacts.slice(0, 2));
-              
-              resolve(contacts);
-            } catch (error) {
-              console.error('Error processing CSV data:', error);
-              reject(new Error('Erro ao processar dados do CSV'));
-            }
-          },
-          error: (error) => {
-            console.error('Papa Parse error:', error);
-            reject(new Error(`Erro ao ler CSV: ${error.message}`));
+    const tryEncoding = (encoding: string) => {
+      const reader = new FileReader();
+      
+      reader.onload = (event) => {
+        try {
+          const csvText = event.target?.result as string;
+          
+          // Check if text contains replacement characters (�) which indicate encoding issues
+          const hasReplacementChars = csvText.includes('�');
+          
+          // If we have replacement characters and more encodings to try, try next encoding
+          if (hasReplacementChars && currentEncodingIndex < encodings.length - 1) {
+            currentEncodingIndex++;
+            console.log(`Encoding ${encoding} failed, trying ${encodings[currentEncodingIndex]}`);
+            tryEncoding(encodings[currentEncodingIndex]);
+            return;
           }
-        });
-      } catch (error) {
-        console.error('Error reading file:', error);
-        reject(new Error('Erro ao ler arquivo CSV'));
-      }
+          
+          console.log(`Using encoding: ${encoding}`);
+          
+          Papa.parse(csvText, {
+            header: true,
+            skipEmptyLines: true,
+            complete: (results) => {
+              try {
+                console.log('CSV parsing results:', results);
+                console.log('Headers found:', results.meta.fields);
+                console.log('First few rows:', results.data.slice(0, 3));
+                
+                const contacts: Contact[] = [];
+                
+                results.data.forEach((row: any, index: number) => {
+                  const contact = mapRowToContact(row);
+                  
+                  // Check if contact has any meaningful data
+                  if (hasValidData(contact)) {
+                    contacts.push(contact);
+                  }
+                });
+
+                console.log(`Successfully extracted ${contacts.length} contacts from CSV`);
+                console.log('Sample contacts:', contacts.slice(0, 2));
+                
+                resolve(contacts);
+              } catch (error) {
+                console.error('Error processing CSV data:', error);
+                reject(new Error('Erro ao processar dados do CSV'));
+              }
+            },
+            error: (error) => {
+              console.error('Papa Parse error:', error);
+              reject(new Error(`Erro ao ler CSV: ${error.message}`));
+            }
+          });
+        } catch (error) {
+          console.error(`Error reading file with encoding ${encoding}:`, error);
+          
+          // If we have more encodings to try, try next one
+          if (currentEncodingIndex < encodings.length - 1) {
+            currentEncodingIndex++;
+            tryEncoding(encodings[currentEncodingIndex]);
+          } else {
+            reject(new Error('Erro ao ler arquivo CSV - codificação não suportada'));
+          }
+        }
+      };
+      
+      reader.onerror = () => {
+        // If we have more encodings to try, try next one
+        if (currentEncodingIndex < encodings.length - 1) {
+          currentEncodingIndex++;
+          tryEncoding(encodings[currentEncodingIndex]);
+        } else {
+          reject(new Error('Erro ao ler arquivo CSV'));
+        }
+      };
+      
+      // Read file as text with specified encoding
+      reader.readAsText(file, encoding);
     };
     
-    reader.onerror = () => {
-      reject(new Error('Erro ao ler arquivo CSV'));
-    };
-    
-    // Read file as text with UTF-8 encoding
-    reader.readAsText(file, 'UTF-8');
+    // Start with the first encoding
+    tryEncoding(encodings[currentEncodingIndex]);
   });
 };
 
