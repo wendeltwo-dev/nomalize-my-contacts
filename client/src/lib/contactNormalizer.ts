@@ -233,13 +233,28 @@ export const normalizeContacts = (contacts: Contact[], rules: NormalizationRules
   return contacts.map(contact => {
     const normalized: Contact = { ...contact };
     
-    // Format individual name parts
-    normalized.firstName = formatName(contact.firstName, rules);
-    normalized.middleName = formatName(contact.middleName, rules);
-    normalized.lastName = formatName(contact.lastName, rules);
+    // Handle name combination first
+    if (rules.combineNames) {
+      // Combine all name parts into firstName
+      normalized.firstName = combineNameParts(contact, rules);
+      // Clear other name fields to avoid duplication
+      normalized.middleName = '';
+      normalized.lastName = '';
+      normalized.namePrefix = '';
+      normalized.nameSuffix = '';
+      // Also set legacy name field
+      normalized.name = normalized.firstName;
+    } else {
+      // Format individual name parts normally
+      normalized.firstName = formatName(contact.firstName, rules);
+      normalized.middleName = formatName(contact.middleName, rules);
+      normalized.lastName = formatName(contact.lastName, rules);
+      normalized.namePrefix = formatName(contact.namePrefix, rules);
+      normalized.nameSuffix = formatName(contact.nameSuffix, rules);
+    }
+    
+    // Format other fields
     normalized.nickname = formatName(contact.nickname, rules);
-    normalized.namePrefix = formatName(contact.namePrefix, rules);
-    normalized.nameSuffix = formatName(contact.nameSuffix, rules);
     
     // Format organization
     normalized.organizationName = formatName(contact.organizationName, rules);
@@ -252,10 +267,7 @@ export const normalizeContacts = (contacts: Contact[], rules: NormalizationRules
     normalized.phone3Value = formatPhone(contact.phone3Value, rules.phoneFormat);
     normalized.phone4Value = formatPhone(contact.phone4Value, rules.phoneFormat);
     
-    // Legacy compatibility
-    if (rules.combineNames) {
-      normalized.name = combineNameParts(contact, rules);
-    }
+    // Legacy compatibility for phone
     if (rules.preferPrimaryPhone) {
       normalized.phone = getPrimaryPhone(contact, rules);
     }
