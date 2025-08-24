@@ -152,6 +152,14 @@ const formatPhone = (phone: string, format: string): string => {
     case 'XXXXXXXXXXX':
       return cleanDigits;
       
+    case 'XXX X XXXX XXXX':
+      if (cleanDigits.length === 11) {
+        return `0${cleanDigits.substring(0, 2)} ${cleanDigits.substring(2, 3)} ${cleanDigits.substring(3, 7)} ${cleanDigits.substring(7)}`;
+      } else if (cleanDigits.length === 10) {
+        return `0${cleanDigits.substring(0, 2)} ${cleanDigits.substring(2, 6)} ${cleanDigits.substring(6)}`;
+      }
+      break;
+      
     case '+55 XX XXXXX XXXX':
       if (cleanDigits.length === 11) {
         return `+55 ${cleanDigits.substring(0, 2)} ${cleanDigits.substring(2, 7)} ${cleanDigits.substring(7)}`;

@@ -14,6 +14,7 @@ export const NormalizationConfig: React.FC<NormalizationConfigProps> = ({ rules,
   const phoneFormats = [
     { label: '+55 (31) 99999-9999', value: '+55 (XX) XXXXX-XXXX', id: 'format1' },
     { label: '031999999999', value: 'XXXXXXXXXXX', id: 'format2' },
+    { label: '031 9 9999 9999', value: 'XXX X XXXX XXXX', id: 'format7' },
     { label: '+55 31 99999 9999', value: '+55 XX XXXXX XXXX', id: 'format3' },
     { label: '(31) 99999-9999', value: '(XX) XXXXX-XXXX', id: 'format4' },
     { label: '31 99999-9999', value: 'XX XXXXX-XXXX', id: 'format5' },
