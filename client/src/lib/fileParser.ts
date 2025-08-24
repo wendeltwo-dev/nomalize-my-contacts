@@ -93,41 +93,58 @@ const createEmptyContact = (): Contact => ({
 // Enhanced CSV parser with proper UTF-8 handling
 const parseCSV = (file: File): Promise<Contact[]> => {
   return new Promise((resolve, reject) => {
-    Papa.parse(file, {
-      header: true,
-      skipEmptyLines: true,
-      encoding: 'UTF-8',
-      complete: (results) => {
-        try {
-          console.log('CSV parsing results:', results);
-          console.log('Headers found:', results.meta.fields);
-          console.log('First few rows:', results.data.slice(0, 3));
-          
-          const contacts: Contact[] = [];
-          
-          results.data.forEach((row: any, index: number) => {
-            const contact = mapRowToContact(row);
-            
-            // Check if contact has any meaningful data
-            if (hasValidData(contact)) {
-              contacts.push(contact);
-            }
-          });
+    const reader = new FileReader();
+    
+    reader.onload = (event) => {
+      try {
+        const csvText = event.target?.result as string;
+        
+        Papa.parse(csvText, {
+          header: true,
+          skipEmptyLines: true,
+          complete: (results) => {
+            try {
+              console.log('CSV parsing results:', results);
+              console.log('Headers found:', results.meta.fields);
+              console.log('First few rows:', results.data.slice(0, 3));
+              
+              const contacts: Contact[] = [];
+              
+              results.data.forEach((row: any, index: number) => {
+                const contact = mapRowToContact(row);
+                
+                // Check if contact has any meaningful data
+                if (hasValidData(contact)) {
+                  contacts.push(contact);
+                }
+              });
 
-          console.log(`Successfully extracted ${contacts.length} contacts from CSV`);
-          console.log('Sample contacts:', contacts.slice(0, 2));
-          
-          resolve(contacts);
-        } catch (error) {
-          console.error('Error processing CSV data:', error);
-          reject(new Error('Erro ao processar dados do CSV'));
-        }
-      },
-      error: (error) => {
-        console.error('Papa Parse error:', error);
-        reject(new Error(`Erro ao ler CSV: ${error.message}`));
+              console.log(`Successfully extracted ${contacts.length} contacts from CSV`);
+              console.log('Sample contacts:', contacts.slice(0, 2));
+              
+              resolve(contacts);
+            } catch (error) {
+              console.error('Error processing CSV data:', error);
+              reject(new Error('Erro ao processar dados do CSV'));
+            }
+          },
+          error: (error) => {
+            console.error('Papa Parse error:', error);
+            reject(new Error(`Erro ao ler CSV: ${error.message}`));
+          }
+        });
+      } catch (error) {
+        console.error('Error reading file:', error);
+        reject(new Error('Erro ao ler arquivo CSV'));
       }
-    });
+    };
+    
+    reader.onerror = () => {
+      reject(new Error('Erro ao ler arquivo CSV'));
+    };
+    
+    // Read file as text with UTF-8 encoding
+    reader.readAsText(file, 'UTF-8');
   });
 };
 
